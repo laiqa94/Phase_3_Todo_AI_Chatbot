@@ -60,4 +60,4 @@ wheels/
 
 # Temporary files
 tmpclaude-*.cwd
-nul
+*.tmpclaude-cwd
