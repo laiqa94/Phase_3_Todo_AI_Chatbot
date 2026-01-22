@@ -76,20 +76,28 @@ async function handler(req: Request, ctx: { params: Promise<{ path: string[] }> 
     }
     // Transform /chat/{user_id} to /api/v1/{user_id}/chat (for AI chatbot endpoints when accessed via proxy)
     else if (transformedPath.match(/^\/chat\/(\d+)$/)) {
-      const userId = transformedPath.match(/^\/chat\/(\d+)$/)[1];
-      transformedPath = `/api/v1/${userId}/chat`;
+      const chatMatch = transformedPath.match(/^\/chat\/(\d+)$/);
+      if (chatMatch) {
+        const userId = chatMatch[1];
+        transformedPath = `/api/v1/${userId}/chat`;
+      }
     }
     // Transform /new_conversation/{user_id} to /api/v1/{user_id}/new_conversation
     else if (transformedPath.match(/^\/new_conversation\/(\d+)$/)) {
-      const userId = transformedPath.match(/^\/new_conversation\/(\d+)$/)[1];
-      transformedPath = `/api/v1/${userId}/new_conversation`;
+      const convMatch = transformedPath.match(/^\/new_conversation\/(\d+)$/);
+      if (convMatch) {
+        const userId = convMatch[1];
+        transformedPath = `/api/v1/${userId}/new_conversation`;
+      }
     }
     // Transform /conversations/{user_id}/{conversation_id} to /api/v1/{user_id}/conversations/{conversation_id}
     else if (transformedPath.match(/^\/conversations\/(\d+)\/(\d+)$/)) {
       const matches = transformedPath.match(/^\/conversations\/(\d+)\/(\d+)$/);
-      const userId = matches[1];
-      const conversationId = matches[2];
-      transformedPath = `/api/v1/${userId}/conversations/${conversationId}`;
+      if (matches) {
+        const userId = matches[1];
+        const conversationId = matches[2];
+        transformedPath = `/api/v1/${userId}/conversations/${conversationId}`;
+      }
     }
 
     const targetPath = `${transformedPath}${incomingUrl.search}`;
@@ -191,9 +199,12 @@ async function handler(req: Request, ctx: { params: Promise<{ path: string[] }> 
         }
         // Transform /{user_id}/chat to /api/v1/{user_id}/chat (for AI chatbot endpoints)
         else if (transformedPath.match(/^\/\d+\/chat$/)) {
-          const userId = transformedPath.match(/^\/(\d+)\/chat$/)[1];
-          console.log(`Proxy: Transforming chat path for userId: ${userId}`);
-          transformedPath = `/api/v1/${userId}/chat`;
+          const chatMatch = transformedPath.match(/^\/(\d+)\/chat$/);
+          if (chatMatch) {
+            const userId = chatMatch[1];
+            console.log(`Proxy: Transforming chat path for userId: ${userId}`);
+            transformedPath = `/api/v1/${userId}/chat`;
+          }
         }
         // Transform /{user_id}/new_conversation to /api/v1/{user_id}/new_conversation
         else if (transformedPath.match(/^\/\d+\/new_conversation$/)) {
@@ -202,9 +213,11 @@ async function handler(req: Request, ctx: { params: Promise<{ path: string[] }> 
         // Transform /conversations/{user_id}/{conversation_id} to /api/v1/conversations/{user_id}/{conversation_id}
         else if (transformedPath.match(/^\/conversations\/\d+\/\d+$/)) {
           const matches = transformedPath.match(/^\/conversations\/(\d+)\/(\d+)$/);
-          const userId = matches[1];
-          const conversationId = matches[2];
-          transformedPath = `/api/v1/conversations/${userId}/${conversationId}`;
+          if (matches) {
+            const userId = matches[1];
+            const conversationId = matches[2];
+            transformedPath = `/api/v1/conversations/${userId}/${conversationId}`;
+          }
         }
 
         // Return appropriate mock data based on the path for 401 scenarios
@@ -470,10 +483,12 @@ async function handler(req: Request, ctx: { params: Promise<{ path: string[] }> 
     console.error('Proxy error for path:', error);
 
     // Check if this is a timeout or network error
-    if (error.name === 'AbortError') {
-      console.error('Request timed out');
-    } else if (error instanceof TypeError && error.message.includes('fetch failed')) {
-      console.error('Network error occurred during fetch');
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.error('Request timed out');
+      } else if (error.message.includes('fetch failed')) {
+        console.error('Network error occurred during fetch');
+      }
     }
 
     // For development, return mock data for certain paths instead of error
