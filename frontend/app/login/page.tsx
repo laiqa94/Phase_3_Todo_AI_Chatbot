@@ -56,7 +56,14 @@ function LoginForm() {
 
       // Process the response to ensure the cookie is set
       const data = await response.json();
-      // The cookie should be set by the API route, so we don't need the token here
+
+      // Store token and user ID in localStorage for client-side use
+      if (data.accessToken) {
+        localStorage.setItem('access_token', data.accessToken);
+      }
+      if (data.user?.id) {
+        localStorage.setItem('user_id', data.user.id.toString());
+      }
 
       toast.success("Logged in.");
       router.replace(next ?? "/dashboard");

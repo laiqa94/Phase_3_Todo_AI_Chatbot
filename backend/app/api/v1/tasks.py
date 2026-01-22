@@ -24,7 +24,7 @@ def create_new_task(
     return create_task(session=session, task_create=task, owner_id=current_user.id)
 
 
-@tasks_router.get("/", response_model=List[TaskRead])
+@tasks_router.get("", response_model=List[TaskRead])
 def read_tasks(
     skip: int = 0,
     limit: int = 100,

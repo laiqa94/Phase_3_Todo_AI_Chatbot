@@ -75,3 +75,75 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   return payload as T;
 }
+
+// Specific API functions for the AI Chatbot
+export interface ChatRequest {
+  message: string;
+  conversation_id?: number;
+}
+
+export interface ChatResponse {
+  conversation_id: number;
+  response: string;
+  has_tools_executed: boolean;
+  tool_results: Array<{
+    tool_name: string;
+    result: any;
+    arguments: any;
+  }>;
+  message_id?: number;
+}
+
+export interface NewConversationRequest {
+  message: string;
+  title?: string;
+}
+
+export interface ConversationHistoryResponse {
+  conversation_id: number;
+  title: string;
+  messages: Array<{
+    id: number;
+    role: string;
+    content: string;
+    timestamp: string;
+  }>;
+}
+
+/**
+ * Send a message to the AI chatbot
+ */
+export async function sendChatMessage(userId: number, request: ChatRequest): Promise<ChatResponse> {
+  return apiFetch<ChatResponse>(`/${userId}/chat`, {
+    method: 'POST',
+    body: request,
+  });
+}
+
+/**
+ * Start a new conversation with the AI chatbot
+ */
+export async function startNewConversation(userId: number, request: NewConversationRequest): Promise<ChatResponse> {
+  return apiFetch<ChatResponse>(`/${userId}/new_conversation`, {
+    method: 'POST',
+    body: request,
+  });
+}
+
+/**
+ * Get conversation history
+ */
+export async function getConversationHistory(userId: number, conversationId: number): Promise<ConversationHistoryResponse> {
+  return apiFetch<ConversationHistoryResponse>(`/conversations/${userId}/${conversationId}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get current user profile
+ */
+export async function getCurrentUser(): Promise<{ id: number; email: string; }> {
+  return apiFetch(`/me`, {
+    method: 'GET',
+  });
+}

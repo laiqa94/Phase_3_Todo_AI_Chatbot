@@ -10,5 +10,12 @@ export async function POST() {
     path: "/",
     expires: new Date(0),
   });
+  cookieStore.set("user_id", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0),
+  });
   return new NextResponse(null, { status: 204 });
 }

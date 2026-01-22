@@ -1,6 +1,6 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 
 class TaskBase(SQLModel):
@@ -14,6 +14,10 @@ class Task(TaskBase, table=True):
     owner_id: int = Field(foreign_key="user.id", index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # Relationship to user
+    if TYPE_CHECKING:
+        user: "User" = None
 
 
 class TaskCreate(TaskBase):
@@ -31,3 +35,11 @@ class TaskUpdate(SQLModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+
+
+# Ensure relationships are properly configured
+try:
+    Task.model_rebuild()
+except AttributeError:
+    # Handle case where model_rebuild is not available
+    pass

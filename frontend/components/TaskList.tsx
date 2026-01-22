@@ -25,9 +25,9 @@ export function TaskList({
 
   return (
     <div className="grid gap-3">
-      {tasks.map((t) => (
+      {tasks.map((t, index) => (
         <TaskCard
-          key={t.id}
+          key={`${t.id}-${index}`}
           task={t}
           onToggleComplete={onToggleComplete}
           onEdit={onEdit}

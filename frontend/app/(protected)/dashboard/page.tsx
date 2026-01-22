@@ -7,11 +7,10 @@ export default async function DashboardPage() {
   // MVP: derive counts from tasks list. If backend provides a summary endpoint later,
   // swap to that without changing UI.
   // NOTE: API path shape may differ; adjust to real backend when known.
-  const data = await apiFetchServer<{ items: Task[] }>("/api/me/tasks", {
+  const tasks = await apiFetchServer<Task[]>("/api/me/tasks", {
     method: "GET",
   });
 
-  const tasks = data.items ?? [];
   const total = tasks.length;
   const completed = tasks.filter((t) => t.status === "completed").length;
   const active = total - completed;
